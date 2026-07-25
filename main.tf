@@ -4,6 +4,7 @@ resource "aws_cloudfront_distribution" "this" {
   default_root_object = var.default_root_object
   price_class         = var.price_class
   aliases             = var.aliases
+  web_acl_id          = var.web_acl_id
 
   origin {
     domain_name = var.origin_domain_name
@@ -32,15 +33,38 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
+  dynamic "logging_config" {
+    for_each = var.logging_config == null ? [] : [var.logging_config]
+
+    content {
+      bucket          = logging_config.value.bucket
+      prefix          = logging_config.value.prefix
+      include_cookies = logging_config.value.include_cookies
+    }
+  }
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
     }
   }
 
+  # The CloudFront default certificate only covers *.cloudfront.net and pins the
+  # viewer connection to a minimum of TLSv1. Serving `aliases` therefore requires
+  # an ACM certificate, which is also what makes minimum_protocol_version settable.
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = var.acm_certificate_arn == null
+    acm_certificate_arn            = var.acm_certificate_arn
+    ssl_support_method             = var.acm_certificate_arn == null ? null : "sni-only"
+    minimum_protocol_version       = var.acm_certificate_arn == null ? null : var.minimum_protocol_version
   }
 
   tags = var.tags
+
+  lifecycle {
+    precondition {
+      condition     = length(var.aliases) == 0 || var.acm_certificate_arn != null
+      error_message = "acm_certificate_arn must be set when aliases are configured: the CloudFront default certificate cannot serve custom domain names."
+    }
+  }
 }
