@@ -30,12 +30,22 @@ variable "price_class" {
 variable "origin_domain_name" {
   description = "DNS domain name of the origin, for example an S3 bucket or custom host."
   type        = string
+
+  validation {
+    condition     = length(trimspace(var.origin_domain_name)) > 0
+    error_message = "origin_domain_name must not be empty."
+  }
 }
 
 variable "origin_id" {
   description = "Unique identifier for the origin within the distribution."
   type        = string
   default     = "default-origin"
+
+  validation {
+    condition     = length(trimspace(var.origin_id)) > 0
+    error_message = "origin_id must not be empty."
+  }
 }
 
 variable "viewer_protocol_policy" {
@@ -50,15 +60,35 @@ variable "viewer_protocol_policy" {
 }
 
 variable "allowed_methods" {
-  description = "HTTP methods CloudFront processes and forwards to the origin."
+  description = "HTTP methods CloudFront processes and forwards to the origin. Must be one of the combinations CloudFront accepts: [GET, HEAD], [GET, HEAD, OPTIONS] or [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]."
   type        = list(string)
   default     = ["GET", "HEAD"]
+
+  validation {
+    # contains() on a list of tuple literals compares element-by-element and
+    # is unreliable across tuples of different lengths, so the combinations
+    # are normalized to sorted, comma-joined strings before comparing.
+    condition = contains([
+      join(",", sort(["GET", "HEAD"])),
+      join(",", sort(["GET", "HEAD", "OPTIONS"])),
+      join(",", sort(["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"])),
+    ], join(",", sort(var.allowed_methods)))
+    error_message = "allowed_methods must be exactly [GET, HEAD], [GET, HEAD, OPTIONS] or [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE] (any order); these are the only combinations CloudFront accepts."
+  }
 }
 
 variable "cached_methods" {
-  description = "HTTP methods for which CloudFront caches responses."
+  description = "HTTP methods for which CloudFront caches responses. Must be [GET, HEAD] or [GET, HEAD, OPTIONS], and must be a subset of allowed_methods."
   type        = list(string)
   default     = ["GET", "HEAD"]
+
+  validation {
+    condition = contains([
+      join(",", sort(["GET", "HEAD"])),
+      join(",", sort(["GET", "HEAD", "OPTIONS"])),
+    ], join(",", sort(var.cached_methods)))
+    error_message = "cached_methods must be exactly [GET, HEAD] or [GET, HEAD, OPTIONS] (any order); these are the only combinations CloudFront accepts."
+  }
 }
 
 variable "aliases" {

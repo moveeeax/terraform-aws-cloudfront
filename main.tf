@@ -66,5 +66,10 @@ resource "aws_cloudfront_distribution" "this" {
       condition     = length(var.aliases) == 0 || var.acm_certificate_arn != null
       error_message = "acm_certificate_arn must be set when aliases are configured: the CloudFront default certificate cannot serve custom domain names."
     }
+
+    precondition {
+      condition     = length(setsubtract(var.cached_methods, var.allowed_methods)) == 0
+      error_message = "cached_methods must be a subset of allowed_methods: CloudFront cannot cache a method it is not configured to process. Add the missing method(s) to allowed_methods, or remove them from cached_methods."
+    }
   }
 }

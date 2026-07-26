@@ -68,11 +68,11 @@ A runnable example lives in [`examples/basic`](examples/basic).
 | `enabled`                | Whether the distribution accepts traffic.               | `bool`         | `true`                 |    no    |
 | `default_root_object`    | Object returned for the root URL.                       | `string`       | `"index.html"`         |    no    |
 | `price_class`            | Price class controlling edge locations.                 | `string`       | `"PriceClass_100"`     |    no    |
-| `origin_domain_name`     | DNS domain name of the origin.                          | `string`       | n/a                    |   yes    |
-| `origin_id`              | Unique identifier for the origin.                       | `string`       | `"default-origin"`     |    no    |
+| `origin_domain_name`     | DNS domain name of the origin. Must not be empty.       | `string`       | n/a                    |   yes    |
+| `origin_id`              | Unique identifier for the origin. Must not be empty.    | `string`       | `"default-origin"`     |    no    |
 | `viewer_protocol_policy` | Protocol policy viewers must use.                       | `string`       | `"redirect-to-https"`  |    no    |
-| `allowed_methods`        | HTTP methods CloudFront processes.                      | `list(string)` | `["GET", "HEAD"]`      |    no    |
-| `cached_methods`         | HTTP methods CloudFront caches.                         | `list(string)` | `["GET", "HEAD"]`      |    no    |
+| `allowed_methods`        | HTTP methods CloudFront processes. Must be `[GET, HEAD]`, `[GET, HEAD, OPTIONS]` or the full 7-method set. | `list(string)` | `["GET", "HEAD"]`      |    no    |
+| `cached_methods`         | HTTP methods CloudFront caches. Must be `[GET, HEAD]` or `[GET, HEAD, OPTIONS]`, and a subset of `allowed_methods`. | `list(string)` | `["GET", "HEAD"]`      |    no    |
 | `aliases`                | Alternate domain names served. Requires `acm_certificate_arn`. | `list(string)` | `[]`            |    no    |
 | `acm_certificate_arn`    | ACM certificate (us-east-1) used to serve `aliases`.    | `string`       | `null`                 |    no    |
 | `minimum_protocol_version` | Minimum TLS version viewers may negotiate. Applies only with `acm_certificate_arn`. | `string` | `"TLSv1.2_2021"` | no |
