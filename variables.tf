@@ -135,3 +135,25 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "cache_policy_id" {
+  description = "ID of the cache policy for the default cache behavior. Defaults to the AWS managed CachingOptimized policy (no query strings, cookies or headers in the cache key), which matches the module's previous forwarded_values settings."
+  type        = string
+  default     = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+
+  validation {
+    condition     = length(trimspace(var.cache_policy_id)) > 0
+    error_message = "cache_policy_id must not be empty."
+  }
+}
+
+variable "origin_request_policy_id" {
+  description = "Optional ID of an origin request policy for the default cache behavior, for forwarding viewer headers, cookies or query strings to the origin without adding them to the cache key."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.origin_request_policy_id == null ? true : length(trimspace(var.origin_request_policy_id)) > 0
+    error_message = "origin_request_policy_id must not be blank; use null to omit it."
+  }
+}
