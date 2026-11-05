@@ -24,13 +24,10 @@ resource "aws_cloudfront_distribution" "this" {
     allowed_methods        = var.allowed_methods
     cached_methods         = var.cached_methods
 
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
+    # Cache and origin request policies replace the deprecated
+    # forwarded_values block.
+    cache_policy_id          = var.cache_policy_id
+    origin_request_policy_id = var.origin_request_policy_id
   }
 
   dynamic "logging_config" {

@@ -8,6 +8,11 @@ variables {
 
 run "defaults_are_secure" {
   assert {
+    condition     = one(aws_cloudfront_distribution.this.default_cache_behavior).cache_policy_id == "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    error_message = "The default cache behavior must use the managed CachingOptimized cache policy instead of the deprecated forwarded_values."
+  }
+
+  assert {
     condition     = one(aws_cloudfront_distribution.this.default_cache_behavior).viewer_protocol_policy == "redirect-to-https"
     error_message = "Viewers must be redirected to HTTPS by default, never served over plain HTTP."
   }
@@ -256,3 +261,31 @@ run "adds_alias_and_certificate_in_place" {
     error_message = "Updating an existing distribution must apply the new alias."
   }
 }
+
+run "custom_cache_and_origin_request_policies" {
+  variables {
+    cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+  }
+
+  assert {
+    condition     = one(aws_cloudfront_distribution.this.default_cache_behavior).cache_policy_id == "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+    error_message = "cache_policy_id must be passed through to the default cache behavior."
+  }
+
+  assert {
+    condition     = one(aws_cloudfront_distribution.this.default_cache_behavior).origin_request_policy_id == "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    error_message = "origin_request_policy_id must be passed through to the default cache behavior."
+  }
+}
+
+run "blank_origin_request_policy_is_rejected" {
+  command = plan
+
+  variables {
+    origin_request_policy_id = "  "
+  }
+
+  expect_failures = [var.origin_request_policy_id]
+}
+

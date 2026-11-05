@@ -73,6 +73,8 @@ A runnable example lives in [`examples/basic`](examples/basic).
 | `viewer_protocol_policy` | Protocol policy viewers must use.                       | `string`       | `"redirect-to-https"`  |    no    |
 | `allowed_methods`        | HTTP methods CloudFront processes. Must be `[GET, HEAD]`, `[GET, HEAD, OPTIONS]` or the full 7-method set. | `list(string)` | `["GET", "HEAD"]`      |    no    |
 | `cached_methods`         | HTTP methods CloudFront caches. Must be `[GET, HEAD]` or `[GET, HEAD, OPTIONS]`, and a subset of `allowed_methods`. | `list(string)` | `["GET", "HEAD"]`      |    no    |
+| `cache_policy_id`        | Cache policy for the default cache behavior. Defaults to the AWS managed CachingOptimized policy. | `string` | `"658327ea-f89d-4fab-a63d-7e88639e58f6"` | no |
+| `origin_request_policy_id` | Optional origin request policy for the default cache behavior. | `string` | `null` | no |
 | `aliases`                | Alternate domain names served. Requires `acm_certificate_arn`. | `list(string)` | `[]`            |    no    |
 | `acm_certificate_arn`    | ACM certificate (us-east-1) used to serve `aliases`.    | `string`       | `null`                 |    no    |
 | `minimum_protocol_version` | Minimum TLS version viewers may negotiate. Applies only with `acm_certificate_arn`. | `string` | `"TLSv1.2_2021"` | no |
