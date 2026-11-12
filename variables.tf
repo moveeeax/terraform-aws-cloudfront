@@ -157,3 +157,14 @@ variable "origin_request_policy_id" {
     error_message = "origin_request_policy_id must not be blank; use null to omit it."
   }
 }
+
+variable "response_headers_policy_id" {
+  description = "ID of the response headers policy for the default cache behavior. Defaults to the AWS managed SecurityHeadersPolicy, which adds Strict-Transport-Security, X-Content-Type-Options, X-Frame-Options, Referrer-Policy and X-XSS-Protection to viewer responses. Set to null to attach no policy."
+  type        = string
+  default     = "67f7725c-6f97-4210-82d7-5512b31e9d03"
+
+  validation {
+    condition     = var.response_headers_policy_id == null ? true : length(trimspace(var.response_headers_policy_id)) > 0
+    error_message = "response_headers_policy_id must not be blank; use null to omit it."
+  }
+}

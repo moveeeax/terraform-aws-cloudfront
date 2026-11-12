@@ -28,6 +28,10 @@ resource "aws_cloudfront_distribution" "this" {
     # forwarded_values block.
     cache_policy_id          = var.cache_policy_id
     origin_request_policy_id = var.origin_request_policy_id
+
+    # Adds HSTS, X-Content-Type-Options, X-Frame-Options and related headers
+    # to viewer responses unless the caller opts out with null.
+    response_headers_policy_id = var.response_headers_policy_id
   }
 
   dynamic "logging_config" {
