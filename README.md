@@ -7,7 +7,14 @@ HTTPS defaults, exposing the distribution domain name for DNS aliasing.
 
 Defaults are chosen to be safe: viewers are redirected to HTTPS, CloudFront
 reaches the origin over `https-only` with TLSv1.2, and a custom certificate
-negotiates `TLSv1.2_2021` or better.
+negotiates `TLSv1.2_2021` or better. Viewer responses carry the AWS managed
+[SecurityHeadersPolicy](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-response-headers-policies.html#managed-response-headers-policies-security)
+headers (`Strict-Transport-Security: max-age=31536000`,
+`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`,
+`Referrer-Policy: strict-origin-when-cross-origin`, `X-XSS-Protection`).
+Except for `X-Content-Type-Options`, a header the origin already sends wins over
+the policy value. Pass your own `response_headers_policy_id`, or `null` to attach
+none.
 
 ## Usage
 
@@ -75,6 +82,7 @@ A runnable example lives in [`examples/basic`](examples/basic).
 | `cached_methods`         | HTTP methods CloudFront caches. Must be `[GET, HEAD]` or `[GET, HEAD, OPTIONS]`, and a subset of `allowed_methods`. | `list(string)` | `["GET", "HEAD"]`      |    no    |
 | `cache_policy_id`        | Cache policy for the default cache behavior. Defaults to the AWS managed CachingOptimized policy. | `string` | `"658327ea-f89d-4fab-a63d-7e88639e58f6"` | no |
 | `origin_request_policy_id` | Optional origin request policy for the default cache behavior. | `string` | `null` | no |
+| `response_headers_policy_id` | Response headers policy for the default cache behavior. Defaults to the AWS managed SecurityHeadersPolicy; `null` attaches none. | `string` | `"67f7725c-6f97-4210-82d7-5512b31e9d03"` | no |
 | `aliases`                | Alternate domain names served. Requires `acm_certificate_arn`. | `list(string)` | `[]`            |    no    |
 | `acm_certificate_arn`    | ACM certificate (us-east-1) used to serve `aliases`.    | `string`       | `null`                 |    no    |
 | `minimum_protocol_version` | Minimum TLS version viewers may negotiate. Applies only with `acm_certificate_arn`. | `string` | `"TLSv1.2_2021"` | no |

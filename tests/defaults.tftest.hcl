@@ -31,6 +31,11 @@ run "defaults_are_secure" {
     condition     = one(aws_cloudfront_distribution.this.viewer_certificate).cloudfront_default_certificate == true
     error_message = "Without an ACM certificate the distribution must fall back to the CloudFront default certificate."
   }
+
+  assert {
+    condition     = one(aws_cloudfront_distribution.this.default_cache_behavior).response_headers_policy_id == "67f7725c-6f97-4210-82d7-5512b31e9d03"
+    error_message = "The default cache behavior must attach the managed SecurityHeadersPolicy so viewers get HSTS and related headers."
+  }
 }
 
 run "acm_certificate_pins_modern_tls" {
@@ -289,3 +294,39 @@ run "blank_origin_request_policy_is_rejected" {
   expect_failures = [var.origin_request_policy_id]
 }
 
+
+run "custom_response_headers_policy" {
+  variables {
+    response_headers_policy_id = "eaab4381-ed33-4a86-88ca-d9558dc6cd63"
+  }
+
+  assert {
+    condition     = one(aws_cloudfront_distribution.this.default_cache_behavior).response_headers_policy_id == "eaab4381-ed33-4a86-88ca-d9558dc6cd63"
+    error_message = "response_headers_policy_id must be passed through to the default cache behavior."
+  }
+}
+
+run "response_headers_policy_opt_out" {
+  # Only the attribute value is checked: with a mocked provider an unset
+  # optional+computed string may come back as a generated value after apply.
+  command = plan
+
+  variables {
+    response_headers_policy_id = null
+  }
+
+  assert {
+    condition     = one(aws_cloudfront_distribution.this.default_cache_behavior).response_headers_policy_id == null
+    error_message = "Setting response_headers_policy_id to null must attach no response headers policy."
+  }
+}
+
+run "blank_response_headers_policy_is_rejected" {
+  command = plan
+
+  variables {
+    response_headers_policy_id = "  "
+  }
+
+  expect_failures = [var.response_headers_policy_id]
+}
